@@ -1,4 +1,4 @@
-#  :tw-270f: Atividade - AWS - Docker - Senac
+#  Atividade - AWS - Docker - Senac
 
 Nesta atividade avaliátiva do programa de bolsas da Compass.UOL iremos colocar em prática os conhecimentos de AWS, Linux e Docker. O repositório abaixo contém a documentação e os passos necessários para realização da tarefa.
 
@@ -60,7 +60,14 @@ Security Group do RDS
 | Custom TCP  | TCP       | 3306                 | sg-instancias    | 
 | Custom TCP  | TCP       | 3306                 | sg-BastionHost         |
 
-##Criando uma VPC
+Security Group do EFS
+
+| Tipo | Protocolo | Intervalo de portas | Origem                                        |
+|------|-----------|---------------------|-----------------------------------------------|
+| Custom TCP  | TCP       | 2049               | sg-Bastion   | 
+| Custom TCP  | TCP       | 2049                 | sg-instancias         |
+
+## Criando uma VPC
 - Digite no menu de pesquisa VPC e acesse o menu de criação da VPC.
 - Vá em **Create VPC**
 - Selecione **VPC Only**
@@ -69,27 +76,27 @@ Security Group do RDS
 - Crie a VPC.
 - Depois clique sobre ela e vá em **Edit VPC setting** e ative a opção **Enable DNS hostnames**
 
-##Criando Internet Gateway
+## Criando Internet Gateway
 - Vá ate o menu de Internet Gateway e clique em **Create Internet Gateway**
 - De um nome de sua preferência, e associe-o á nossa VPC criada anteriorimente.
 
-##Criando NAT gatewat
+## Criando NAT gatewat
 - Ainda no menu de VPC, clique **NAT Gateway** e depois em **Create Nat gateway**
 - De um nome de sua escolha, selecione uma sub-net publica, criada anteriormente e em **Connectivity type** deixe como público.
 - Por fim associe um elastic IP e crie a NAT.
 
-##Criando Sub-nets
+## Criando Sub-nets
 - No menu de VPC ainda, vá em subnets e depois em **Create subnet**
 - Crie duas sub-redes, uma pública e uma privada, elas precisam estar na mesma zona de disponibilidade. Repita o processo para a segunda zona de diponibilidade;
 
-##Criando tabela de rotas
+## Criando tabela de rotas
 - Crie uma Route table em **route tables** e depois em **create route table**
 - Crie duas tabelas, uma para sub-nets privadas e outra para sub-nets públicas.
 - Depois associe cada sub-net a sua respectiva tabela, privada na tabela privada e publica na tabela publica.
 - Selecione a tabela privada e clique em **Edit Routes** o Destinatinatio deve ser 0.0.0.0/0 e o Target deve ser o **internet gateway**, o mesmo que criamos a pouco.
 - Selecione a tabela publica e clique em **Edit Routes** o Destinatinatio deve ser 0.0.0.0/0 e o Target deve ser o **NAT Gateway**, o mesmo que criamos a pouco.
 
-##EFS (Elastic File Sistem)
+## EFS (Elastic File Sistem)
 - Vá até o serviço de EFS na aws e clique em **Create File System**;
 - Selecione a VPC criada anteriormente e clique em **next**;
 - Defina as duas zonas de disponibilidade e mude o security group para o criado anteriormente;
@@ -154,7 +161,7 @@ sudo sed -i '/^$/d' /home/ec2-user/docker-compose/docker-compose.yml
 - Selecione a instância previamente criada, nosso bastion host, clique com o botão direito sobre e vá em > "Image and Templates" > "Create Image"; Nomeie e finalize a criação.
 
 
- ##Criação e configuração do Target Group
+ ## Criação e configuração do Target Group
  - No menu de **Load Balancing**, abaixo dele clique em **Target Groups**
  - Depois em ** Create target Group**
  - Selecione **Instances**
@@ -162,5 +169,39 @@ sudo sed -i '/^$/d' /home/ec2-user/docker-compose/docker-compose.yml
  - Selecione a VPC criada anteriormente e o resto deixaremos como está
  - Clique em **next** e **create**
  
- ##Configuração do Load Balancer
+ ## Configuração do Load Balancer
  - Clique no menu a esquerda **Load Balancing** e depois em **Create Load Balancer**
+ - Depois em **Application Load Balancer**
+ - De um nome que desejar.
+ - Na opção **scheme** deixe em **Internet-facing**
+ - Em **IP address type** deixe em IPv4
+ - Associe a VPC criada anteriormente.
+ - Selecione duas AZs
+ - Selecione o SG criado anteriormente e por fim confirme a criação do LB.
+ 
+ ## Configuração do Auto Scalling
+ - Clique em **Auto Scalling**
+ - Depois em **Create Launch Template**
+ - De um nome para o template.
+ - Uma descrição rápida
+ - Selecione a AMI que criamos anteriormente.
+ - O tipo de instancia que desejar, eu irei utilizar a **t3.small**.
+ - Selecione o seu par de chaves.
+ - Selecione o SG criado anteriormente.
+ - Clique em **Advanced Details** e adicione o seguinte script:
+```shell
+#!/bin/bash
+sudo yum update -y
+sudo systemctl start docker
+cd /home/ec2-user/docker-compose/
+docker-compose up -d
+```
+ - Finalize a criação do template.
+ - Volte para o menu de Auto Scalling e selecione o template criado anteriormente e clique em **next**
+ - Depois selecione **Attach to a new Load Balancer**
+ - De um nome de sua preferencia e selecione **internet facing**
+ - Verifique se a VPC é a certa e se as subnetes são as públicas das duas zonas de disponibilidade.
+ - Na opção de **listeners**, crie um novo.
+ - Mantenha o resto como está e clique em **next**
+ - Define as capacidades que deseja. Neste caso, faremos da seguinte maneira (Capacidade desejada: 2, Capacidade mínima: 2, Capacidade máxima: 4);
+ - Clique em **next** e confirme a criação do template de **Auto Scalling**
