@@ -24,6 +24,15 @@ Construir o ambiente proposto abaixo:
 - Utilizar repositório git para versionamento;
 - Criar documentação.
 
+## Criando uma VPC
+- Digite no menu de pesquisa VPC e acesse o menu de criação da VPC.
+- Vá em **Create VPC**
+- Selecione **VPC Only**
+- Coloque um nome de sua preferência.
+- Em IPv4 CIDR coloque 10.0.0.0/16
+- Crie a VPC.
+- Depois clique sobre ela e vá em **Edit VPC setting** e ative a opção **Enable DNS hostnames**
+
 ## Criando Security Groups
 
 Security group do Load Balancer
@@ -67,20 +76,12 @@ Security Group do EFS
 | Custom TCP  | TCP       | 2049               | sg-Bastion   | 
 | Custom TCP  | TCP       | 2049                 | sg-instancias         |
 
-## Criando uma VPC
-- Digite no menu de pesquisa VPC e acesse o menu de criação da VPC.
-- Vá em **Create VPC**
-- Selecione **VPC Only**
-- Coloque um nome de sua preferência.
-- Em IPv4 CIDR coloque 10.0.0.0/16
-- Crie a VPC.
-- Depois clique sobre ela e vá em **Edit VPC setting** e ative a opção **Enable DNS hostnames**
 
 ## Criando Internet Gateway
 - Vá ate o menu de Internet Gateway e clique em **Create Internet Gateway**
 - De um nome de sua preferência, e associe-o á nossa VPC criada anteriorimente.
 
-## Criando NAT gatewat
+## Criando NAT gateway
 - Ainda no menu de VPC, clique **NAT Gateway** e depois em **Create Nat gateway**
 - De um nome de sua escolha, selecione uma sub-net publica, criada anteriormente e em **Connectivity type** deixe como público.
 - Por fim associe um elastic IP e crie a NAT.
@@ -163,7 +164,7 @@ sudo sed -i '/^$/d' /home/ec2-user/docker-compose/docker-compose.yml
 
  ## Criação e configuração do Target Group
  - No menu de **Load Balancing**, abaixo dele clique em **Target Groups**
- - Depois em ** Create target Group**
+ - Depois em **Create target Group**
  - Selecione **Instances**
  - Selecione um nome 
  - Selecione a VPC criada anteriormente e o resto deixaremos como está
